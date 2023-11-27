@@ -36,8 +36,9 @@ fn main() {
     let mut phi: f64 = PHASE_OFFSET; // input signal's initial phase
     let mut phi_hat: f64 = 0.0; // PLL's initial phase
 
-    let mut x = Complex::new(0., 0.);
-    let mut y = Complex::new(0., 0.);
+    let mut ref_input: Complex<f64>;
+    //  = Complex::new(0., 0.);
+    let mut sig_output: Complex<f64>;
 
     println!("# {:6} {:12.8} {:12.8} {:12.8} {:12.8} {:12.8} ",
     "index", "real(x)", "imag(x)", "real(y)", "imag(y)", "error");
@@ -45,19 +46,19 @@ fn main() {
 
     for i in 0..N {
         // compute input sinusoid and update phase
-        x = Complex::new(phi.cos(), phi.sin());
+        ref_input = Complex::new(phi.cos(), phi.sin());
         phi += FREQUENCY_OFFSET;
 
         // compute PLL output from phase estimate
-        y = Complex::new(phi_hat.cos(), phi_hat.sin());
+        sig_output = Complex::new(phi_hat.cos(), phi_hat.sin());
 
         // compute error estimate
-        let delta_phi: f64 = (x * y.conj()).arg();
+        let delta_phi: f64 = (ref_input * sig_output.conj()).arg();
 
         // print results to standard output
         println!(
             "{:6} {:12.8} {:12.8} {:12.8} {:12.8} {:12.8}",
-            i, x.re, x.im, y.re, y.im, delta_phi
+            i, ref_input.re, ref_input.im, sig_output.re, sig_output.im, delta_phi
         );
 
         // push result through loop filter, updating phase estimate
