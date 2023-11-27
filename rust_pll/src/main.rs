@@ -1,12 +1,26 @@
 use num::{complex::ComplexFloat, Complex};
+use clap::Parser;
 
-// parameters
+// defaults
 const PHASE_OFFSET: f64 = 0.00; // carrier phase offset
 const FREQUENCY_OFFSET: f64 = 0.30; // carrier frequency offset
 const WN: f64 = 0.01; // pll bandwidth
 const ZETA: f64 = 0.707; // pll damping factor
 const K: f64 = 1000.0; // pll loop gain
 const N: usize = 400; // number of samples
+
+#[derive(Parser, Debug, Clone)]
+#[command(version, about, long_about = None)]
+struct Cli {
+    #[arg(long = "phaseOffset", default_value_t = PHASE_OFFSET)]
+    phase_offset: f64,
+
+    #[arg(long = "frequencyOffset", default_value_t = FREQUENCY_OFFSET)]
+    frequency_offset: f64,
+
+    #[arg(long = "pll.bandwidth", default_value_t = WN)]
+    pll_bandwidth: f64,
+}
 
 fn main() {
     // generate loop filter parameters (active PI design)
