@@ -1,3 +1,4 @@
 /target
 *.dat
 *.png
+!screenshot.png

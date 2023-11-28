@@ -1,6 +1,14 @@
 ## Notes
 Based on https://en.wikipedia.org/wiki/Phase-locked_loop and ported directly from the C code as per https://liquidsdr.org/blog/pll-howto/
 
+Can lock onto reference signal even when frequency is allowed to vary randomly (noisy), e.g.:
+
+`cargo run -- --ref.varyRandomChance=0.9 --ref.varyRandomMax=0.1 --ref.frequency 0.2 --samples 400 --pll.bandwidth 0.02 > pll_example.dat && gnuplot -e 'set terminal png size 800,700' pll_example.gnuplot > pll_example.png`
+
+...produces output like:
+
+![Alt text](screenshot.png)
+
 ## What I've learned
 When the input/reference frequency (`--ref.frequency`) is increased, it helps to increase the bandwidth (`--pll.bandwidth`) of the output/signal accordingly, or it will take very long to achieve lock (if at all!). 
 
@@ -25,4 +33,5 @@ gnuplot -e 'set terminal png size 800,700' pll_example.gnuplot > pll_example.png
 ```
 
 ## TODO
-Simulate varying frequency.
+- [x] Simulate varying frequency
+- [ ] Automatic peak detection from noisy ref?
