@@ -7,7 +7,7 @@ Can lock onto reference signal even when frequency is allowed to vary randomly (
 
 ...produces output like:
 
-![Alt text](screenshot.png)
+![gnuplot showing varying frequency ref](screenshot.png)
 
 ## What I've learned
 When the input/reference frequency (`--ref.frequency`) is increased, it helps to increase the bandwidth (`--pll.bandwidth`) of the output/signal accordingly, or it will take very long to achieve lock (if at all!). 
