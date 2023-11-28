@@ -18,11 +18,11 @@ struct Cli {
     pub loglevel: String,
 
     /// Carrier (simulated input) phase offset
-    #[arg(long = "phaseOffset", default_value_t = PHASE_OFFSET)]
+    #[arg(long = "ref.phase", default_value_t = PHASE_OFFSET)]
     phase_offset: f64,
 
     /// Carrier (simulated input) frequency offset
-    #[arg(long = "frequencyOffset", default_value_t = FREQUENCY_OFFSET)]
+    #[arg(long = "ref.frequency", default_value_t = FREQUENCY_OFFSET)]
     frequency_offset: f64,
 
     /// PLL (output) bandwidth
@@ -34,7 +34,7 @@ struct Cli {
     pll_damping: f64,
 
     /// PLL (output) loop gain
-    #[arg(long = "pll.loopGain", default_value_t = K)]
+    #[arg(long = "pll.gain", default_value_t = K)]
     pll_loop_gain: f64,
 
     /// Number of samples for simulation
