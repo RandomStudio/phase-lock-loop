@@ -17,21 +17,27 @@ struct Cli {
     #[arg(long="loglevel", default_value_t=String::from("info"))]
     pub loglevel: String,
 
+    /// Carrier (simuulated input) phase offset
     #[arg(long = "phaseOffset", default_value_t = PHASE_OFFSET)]
     phase_offset: f64,
 
+    /// Carrier (simuulated input) frequency offset
     #[arg(long = "frequencyOffset", default_value_t = FREQUENCY_OFFSET)]
     frequency_offset: f64,
 
+    /// PLL (output) bandwidth
     #[arg(long = "pll.bandwidth", default_value_t = WN)]
     pll_bandwidth: f64,
 
+    /// PLL (output) damping factor
     #[arg(long = "pll.damping", default_value_t = ZETA)]
     pll_damping: f64,
 
+    /// PLL (output) loop gain
     #[arg(long = "pll.loopGain", default_value_t = K)]
     pll_loop_gain: f64,
 
+    /// Number of samples for simulation
     #[arg(long = "samples", default_value_t = N)]
     num_samples: usize,
 
