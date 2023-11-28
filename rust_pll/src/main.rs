@@ -1,3 +1,5 @@
+use env_logger::{Builder, Env};
+use log::debug;
 use num::{complex::ComplexFloat, Complex};
 use clap::Parser;
 
@@ -12,6 +14,9 @@ const N: usize = 400; // number of samples
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about = None)]
 struct Cli {
+    #[arg(long="loglevel", default_value_t=String::from("info"))]
+    pub loglevel: String,
+
     #[arg(long = "phaseOffset", default_value_t = PHASE_OFFSET)]
     phase_offset: f64,
 
@@ -20,17 +25,33 @@ struct Cli {
 
     #[arg(long = "pll.bandwidth", default_value_t = WN)]
     pll_bandwidth: f64,
+
+    #[arg(long = "pll.damping", default_value_t = ZETA)]
+    pll_damping: f64,
+
+    #[arg(long = "pll.loopGain", default_value_t = K)]
+    pll_loop_gain: f64,
+
+    #[arg(long = "samples", default_value_t = N)]
+    num_samples: usize,
+
 }
 
 fn main() {
+    let settings = Cli::parse();
+
+    Builder::from_env(Env::default().default_filter_or(&settings.loglevel))
+    .filter_module("paho_mqtt", log::LevelFilter::Warn)
+    .init();
+
     // generate loop filter parameters (active PI design)
-    let t1 = K / (WN * WN); // tau_1
-    let t2 = 2.0 * ZETA / WN; // tau_2
+    let t1 = settings.pll_loop_gain / (settings.pll_bandwidth * settings.pll_bandwidth); // tau_1
+    let t2 = 2.0 * settings.pll_damping / settings.pll_bandwidth; // tau_2
 
     // feed-forward coefficients (numerator)
-    let b0 = (4.0 * K / t1) * (1. + t2 / 2.0);
-    let b1 = 8.0 * K / t1;
-    let b2 = (4.0 * K / t1) * (1. - t2 / 2.0);
+    let b0 = (4.0 * settings.pll_loop_gain / t1) * (1. + t2 / 2.0);
+    let b1 = 8.0 * settings.pll_loop_gain / t1;
+    let b2 = (4.0 * settings.pll_loop_gain / t1) * (1. - t2 / 2.0);
 
     // feed-back coefficients (denominator)
     //    a0 =  1.0  is implied
@@ -38,16 +59,16 @@ fn main() {
     let a2 = 1.0;
 
     // print filter coefficients (as comments)
-    println!("#  b = [b0:{:12.8}, b1:{:12.8}, b2:{:12.8}]", b0, b1, b2);
-    println!("#  a = [a0:{:12.8}, a1:{:12.8}, a2:{:12.8}]", 1., a1, a2);
+    debug!("#  b = [b0:{:12.8}, b1:{:12.8}, b2:{:12.8}]", b0, b1, b2);
+    debug!("#  a = [a0:{:12.8}, a1:{:12.8}, a2:{:12.8}]", 1., a1, a2);
 
     // filter buffer
     let mut v0 = 0.0;
     let mut v1 = 0.0;
-    let mut v2 = 0.0;
+    let mut v2: f64;
 
     // initialize states
-    let mut phi: f64 = PHASE_OFFSET; // input signal's initial phase
+    let mut phi: f64 = settings.phase_offset; // input signal's initial phase
     let mut phi_hat: f64 = 0.0; // PLL's initial phase
 
     let mut ref_input: Complex<f64>;
@@ -58,10 +79,10 @@ fn main() {
     "index", "real(x)", "imag(x)", "real(y)", "imag(y)", "error");
 
 
-    for i in 0..N {
+    for i in 0..settings.num_samples {
         // compute input sinusoid and update phase
         ref_input = Complex::new(phi.cos(), phi.sin());
-        phi += FREQUENCY_OFFSET;
+        phi += settings.frequency_offset;
 
         // compute PLL output from phase estimate
         sig_output = Complex::new(phi_hat.cos(), phi_hat.sin());
