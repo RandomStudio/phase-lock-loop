@@ -17,13 +17,18 @@ struct Cli {
     #[arg(long="loglevel", default_value_t=String::from("info"))]
     pub loglevel: String,
 
-    /// Carrier (simulated input) phase offset
+    /// Ref (simulated input) phase offset
     #[arg(long = "ref.phase", default_value_t = PHASE_OFFSET)]
     phase_offset: f64,
 
-    /// Carrier (simulated input) frequency offset
+    /// Ref (simulated input) frequency offset
     #[arg(long = "ref.frequency", default_value_t = FREQUENCY_OFFSET)]
     frequency_offset: f64,
+
+    /// Add this value to the ref (input) every sample, to simulate
+    /// a constant increase/decrease over time
+    #[arg(long = "ref.varyConstant", default_value_t = 0.)]
+    frequency_constant_vary: f64,
 
     /// PLL (output) bandwidth
     #[arg(long = "pll.bandwidth", default_value_t = WN)]
@@ -85,10 +90,14 @@ fn main() {
         "index", "real(x)", "imag(x)", "real(y)", "imag(y)", "error"
     );
 
+    let mut ref_frequency = settings.frequency_offset;
+
     for i in 0..settings.num_samples {
+        ref_frequency += settings.frequency_constant_vary;
+
         // compute input sinusoid and update phase
         ref_input = Complex::new(phi.cos(), phi.sin());
-        phi += settings.frequency_offset;
+        phi += ref_frequency;
 
         // compute PLL output from phase estimate
         sig_output = Complex::new(phi_hat.cos(), phi_hat.sin());
