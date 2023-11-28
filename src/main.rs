@@ -1,7 +1,9 @@
 use clap::Parser;
 use env_logger::{Builder, Env};
 use log::debug;
+use map_range::MapRange;
 use num::{complex::ComplexFloat, Complex};
+use rand::prelude::*;
 
 // defaults
 const PHASE_OFFSET: f64 = 0.00; // carrier phase offset
@@ -29,6 +31,12 @@ struct Cli {
     /// a constant increase/decrease over time
     #[arg(long = "ref.varyConstant", default_value_t = 0.)]
     frequency_constant_vary: f64,
+
+    #[arg(long = "ref.varyRandomChance", default_value_t = 0.)]
+    frequency_random_chance: f64,
+
+    #[arg(long = "ref.varyRandomMax", default_value_t = 0.)]
+    frequency_random_max: f64,
 
     /// PLL (output) bandwidth
     #[arg(long = "pll.bandwidth", default_value_t = WN)]
@@ -92,8 +100,19 @@ fn main() {
 
     let mut ref_frequency = settings.frequency_offset;
 
+    let mut rng_chance = rand::thread_rng();
+    let mut rng_amt = rand::thread_rng();
+
     for i in 0..settings.num_samples {
-        ref_frequency += settings.frequency_constant_vary;
+        let noise_vary = match rng_chance.gen::<f64>() {
+            x if x < settings.frequency_random_chance => 0.,
+            _ => rng_amt.gen::<f64>().map_range(
+                0. ..1.0,
+                -settings.frequency_random_max..settings.frequency_random_max,
+            ),
+        };
+
+        ref_frequency += settings.frequency_constant_vary + noise_vary;
 
         // compute input sinusoid and update phase
         ref_input = Complex::new(phi.cos(), phi.sin());
