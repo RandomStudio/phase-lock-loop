@@ -25,4 +25,5 @@ gnuplot -e 'set terminal png size 800,700' pll_example.gnuplot > pll_example.png
 ```
 
 ## TODO
-Simulate varying frequency.
+- [x] Simulate varying frequency
+- [ ] Automatic peak detection from noisy ref?
