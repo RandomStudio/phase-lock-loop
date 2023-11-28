@@ -1,7 +1,7 @@
+use clap::Parser;
 use env_logger::{Builder, Env};
 use log::debug;
 use num::{complex::ComplexFloat, Complex};
-use clap::Parser;
 
 // defaults
 const PHASE_OFFSET: f64 = 0.00; // carrier phase offset
@@ -17,11 +17,11 @@ struct Cli {
     #[arg(long="loglevel", default_value_t=String::from("info"))]
     pub loglevel: String,
 
-    /// Carrier (simuulated input) phase offset
+    /// Carrier (simulated input) phase offset
     #[arg(long = "phaseOffset", default_value_t = PHASE_OFFSET)]
     phase_offset: f64,
 
-    /// Carrier (simuulated input) frequency offset
+    /// Carrier (simulated input) frequency offset
     #[arg(long = "frequencyOffset", default_value_t = FREQUENCY_OFFSET)]
     frequency_offset: f64,
 
@@ -40,15 +40,14 @@ struct Cli {
     /// Number of samples for simulation
     #[arg(long = "samples", default_value_t = N)]
     num_samples: usize,
-
 }
 
 fn main() {
     let settings = Cli::parse();
 
     Builder::from_env(Env::default().default_filter_or(&settings.loglevel))
-    .filter_module("paho_mqtt", log::LevelFilter::Warn)
-    .init();
+        .filter_module("paho_mqtt", log::LevelFilter::Warn)
+        .init();
 
     // generate loop filter parameters (active PI design)
     let t1 = settings.pll_loop_gain / (settings.pll_bandwidth * settings.pll_bandwidth); // tau_1
@@ -81,9 +80,10 @@ fn main() {
     //  = Complex::new(0., 0.);
     let mut sig_output: Complex<f64>;
 
-    println!("# {:6} {:12.8} {:12.8} {:12.8} {:12.8} {:12.8} ",
-    "index", "real(x)", "imag(x)", "real(y)", "imag(y)", "error");
-
+    println!(
+        "# {:6} {:12.8} {:12.8} {:12.8} {:12.8} {:12.8} ",
+        "index", "real(x)", "imag(x)", "real(y)", "imag(y)", "error"
+    );
 
     for i in 0..settings.num_samples {
         // compute input sinusoid and update phase
